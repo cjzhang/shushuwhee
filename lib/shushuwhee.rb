@@ -39,11 +39,13 @@ module Shushuwhee
         puts "Debug:   chapter  #{chapter.children.first.child.text}"
         chapter_text = read_chapter(chapter)
         output(chapter_text, output_file)
+        printf "."
       end
 
       if output_file
         output_file.close
       end
+      puts " :)"
     end
 
     # Returns the chapter text for a given chapter
