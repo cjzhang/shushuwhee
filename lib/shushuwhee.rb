@@ -1,3 +1,4 @@
+#
 require "shushuwhee/version"
 require 'open-uri'
 require 'nokogiri'
@@ -96,24 +97,34 @@ module Shushuwhee
 
     def create_builder(book_id, tmpdir, chapter_list)
       title_page = Nokogiri::HTML(open(title_url(book_id)))
-      identifier = title_url(book_id)
+
+      parsed_identifier = title_url(book_id)
+      parsed_title = title_page.css(".bookname").text
+      metadata = title_page.css("#bookul li")
+      parsed_author = metadata.first.children.last.text[1..-2]
+      parsed_date = metadata[3].children.last.text.split(":")[1..-1].join(":")
+
+      image_path = download_image(title_page.css(".bookimg"), tmpdir)
+
+      p image_path
       # create cover image
+
       builder = GEPUB::Builder.new do
-        unique_identifier identifier, 'url'
+        unique_identifier parsed_identifier, 'url'
         language 'zh'
 
-        title "#bookname"
+        title parsed_title
         #subtitle (none)
         #collection (none)
-        creator "author name"
+        creator parsed_author
 
         id book_id
 
-        date DateTime.now.to_s # (last update: the thing after /list-7.html)"
+        date parsed_date
         publisher "shushuw.cn"
 
         resources(:workdir => tmpdir) do
-          # cover_image (.bookimg)
+          cover_image image_path
           ordered do
             chapter_list.each do |chapter_info|
               file chapter_info[:file]
@@ -155,6 +166,16 @@ module Shushuwhee
 
     def chapter_title(chapter)
       chapter.children.first.text
+    end
+
+    def download_image(image_element, tmpdir)
+      url = SHUSHUWEN_URL + image_element.first.attributes["src"].value
+      filename = url.split("/").last
+      file_path = File.join(tmpdir, filename)
+      File.open(file_path, "wb") do |file|
+        file.write(open(url).read)
+      end
+      filename
     end
 
     # Appends the chapter text to the file.
