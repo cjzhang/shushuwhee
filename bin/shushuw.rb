@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << "../lib"
+$: << "./lib"
 
 require 'shushuwhee'
 require 'shushuwhee/cmd_parser'
@@ -84,7 +84,8 @@ class CmdRunner
     else
       @subcmd_argv.each do | book_id |
         puts "downloading book: #{book_id}"
-        Shushuwhee.read_book(book_id, book_id)
+        Shushuwhee.read_book(book_id, {:output_file_name => book_id, 
+                                       :format => "epub"})
       end
     end
   end
