@@ -16,6 +16,7 @@ module Shushuwhee
     # @param output_file_name The file to output the parsed story as.
     #   If nil, outputs to stdout. 
     def read_book(book_id, output_file_name=nil)
+      puts "#{book_id}"
       output_file = nil
       if output_file_name
         output_file = File.open(output_file_name, "w")
@@ -27,11 +28,13 @@ module Shushuwhee
       chapters.each do |chapter|
         chapter_text = read_chapter(chapter)
         output(chapter_text, output_file)
+        printf "."
       end
 
       if output_file
         output_file.close
       end
+      puts " :)"
     end
 
     # Returns the chapter text for a given chapter
