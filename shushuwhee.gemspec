@@ -24,4 +24,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov-gem-adapter', '~> 1.0.0'
 
   s.add_dependency 'nokogiri'
+  s.add_dependency 'open-uri'
 end
