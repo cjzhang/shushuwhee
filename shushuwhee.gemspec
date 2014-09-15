@@ -5,7 +5,7 @@ require "shushuwhee/version"
 Gem::Specification.new do |s|
   s.name        = "shushuwhee"
   s.version     = Shushuwhee::VERSION
-  s.authors     = ["TODO: Write your name"]
+  s.authors     = ["cjzhang and ypz"]
   s.email       = ["TODO: Write your email address"]
   s.homepage    = ""
   s.summary     = %q{TODO: Write a gem summary}
@@ -22,6 +22,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov', '~> 0.7.0'
   s.add_development_dependency 'simplecov-html', '~> 0.7.0'
   s.add_development_dependency 'simplecov-gem-adapter', '~> 1.0.0'
+  s.add_development_dependency 'pry'
 
   s.add_dependency 'nokogiri'
+  s.add_dependency 'gepub'
 end
