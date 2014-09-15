@@ -18,6 +18,11 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
+  s.add_development_dependency 'rspec', '~> 2.13.0'
+  s.add_development_dependency 'simplecov', '~> 0.7.0'
+  s.add_development_dependency 'simplecov-html', '~> 0.7.0'
+  s.add_development_dependency 'simplecov-gem-adapter', '~> 1.0.0'
+
   s.add_dependency 'nokogiri'
   s.add_dependency 'open-uri'
 end
