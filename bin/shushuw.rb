@@ -2,8 +2,8 @@
 
 $: << "../lib"
 
+require 'shushuwhee'
 require 'shushuwhee/cmd_parser'
-require 'pp'
 
 PROGNAME = File.basename(__FILE__)
 BANNER = "
@@ -24,7 +24,8 @@ EXAMPLES = "
   Examples:
     Some sample cmds
 
-	#{PROGNAME} get http://shushuw/1234.html
+	#{PROGNAME}  [ --debug] [ --dir ./shu ]  --file book.list get 
+	#{PROGNAME}   get  1234 5678 56789
 "
 
 CMD_SPECS = \
@@ -32,8 +33,8 @@ CMD_SPECS = \
    :commands => CMDS,
    :specs  => [
                ['debug', nil, false, nil, false, "optional boolean option with default value of false"],
-               ['blah', 'b', "blah", String, false, "an optional with both short and long option name defined"],
-               [nil, 'x', "xx", String, false, "an optional with only short name defined"],
+               ['dir', 'd', "dir=./shu", String, false, "destination dir for downloaded files"],
+               ['file', 'f', "file", String, false, "a file contains list of books to download"],
    ],
    :examples => EXAMPLES
   }
@@ -55,37 +56,55 @@ class CmdRunner
     @opts        = @cmd_parser.options
     @subcmd_opts = @cmd_parser.additional_opts
     @subcmd_argv = @cmd_parser.subcmd_argv
-    puts "opts: #{@opts}\n\n"
+    puts "opts: #{@opts}\n\n" if @opts[:debug]
   end
 
   def run(cmd = @opts[:cmd])
     if KNOWN_CMDS.include?(cmd)
-      send("do_#{cmd}", @subcmd_opts, @subcmd_argv) 
+      send("do_#{cmd}", @opts, @subcmd_argv) 
     else  
       do_default(cmd, @subcmd_opts, @subcmd_argv)
     end
   end
 
   def do_get(opts={}, argv=[])
-    puts "Execute cmd 'get':"
-    puts "  do_get(): opts = #{opts}; argv = #{argv}"
+    if opts[:debug]
+      puts "Execute cmd 'get':"
+      puts "  do_get(): opts = #{opts}; argv = #{argv}"
+    end
+    if opts[:file]
+      File.open(opts[:file]) do | file | 
+        books = file.readlines
+        Shushuwhee.read_many(books, opts[:dir])
+        
+#        while line = file.gets
+#          puts "downloading book: #{line}"
+#        end
+      end
+    else
+      @subcmd_argv.each do | book_id |
+        puts "downloading book: #{book_id}"
+        Shushuwhee.read_book(book_id, book_id)
+      end
+    end
   end
 
-  def do_set(opts={}, argv=[])
-    puts "Execute cmd 'set':"
-    puts "  do_set(): opts = #{opts}; argv = #{argv}"
-  end
-
-  def do_default(cmd, opts={}, argv=[])
+#  def do_set(opts={}, argv=[])
+#    puts "Execute cmd 'set':"
+#    puts "  do_set(): opts = #{opts}; argv = #{argv}"
+#  end
+#
+#  def do_default(cmd, opts={}, argv=[])
 #    if cmd.nil?
 #      puts @cmd_parser.optparse 
 #      raise
 #    end
-    puts "Execute cmd 'default':"
-    puts "  do_default(): cmd  = '#{cmd}'"
-    puts "                opts = '#{opts}'"
-    puts "                argv = '#{argv}'"
-  end
+#    puts "Execute cmd 'default':"
+#    puts "  do_default(): cmd  = '#{cmd}'"
+#    puts "                opts = '#{opts}'"
+#    puts "                argv = '#{argv}'"
+#  end
+
 end
 
 @cmd_parser = Shushuwhee::CmdParser.new(CMD_SPECS)

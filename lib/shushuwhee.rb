@@ -1,6 +1,7 @@
 require "shushuwhee/version"
 require 'open-uri'
 require 'nokogiri'
+require 'fileutils'
 
 module Shushuwhee
   SHUSHUWEN_URL = "http://www.shushuw.cn/"
@@ -10,12 +11,21 @@ module Shushuwhee
     # Finds all the books in book_list and reads them, outputting their
     # content as text files in the "shu" folder (creates folder if missing).
     def read_many(book_list, output_folder_name="shu")
+      unless File.exist?(output_folder_name) and File.directory?(output_folder_name)
+        FileUtils.mkdir(output_folder_name)
+      end
+      book_list.each do | book_id |
+        book_id = book_id.chomp
+        outfile = File.join(output_folder_name, book_id)
+        read_book(book_id, outfile)
+      end
     end
 
     # Shushuwhee.read(book_id)
     # @param output_file_name The file to output the parsed story as.
     #   If nil, outputs to stdout. 
     def read_book(book_id, output_file_name=nil)
+      puts "Debug: Book #{book_id}"
       output_file = nil
       if output_file_name
         output_file = File.open(output_file_name, "w")
@@ -24,7 +34,9 @@ module Shushuwhee
       table_of_contents = Nokogiri::HTML(open(table_of_contents_url(book_id)))
       chapters = table_of_contents.css("ul li")
 
-      chapters.each do |chapter|
+#      chapters.each do |chapter|
+      chapters[0..2].each do |chapter|
+        puts "Debug:   chapter  #{chapter.children.first.child.text}"
         chapter_text = read_chapter(chapter)
         output(chapter_text, output_file)
       end
