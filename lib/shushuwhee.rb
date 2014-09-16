@@ -13,6 +13,7 @@ require 'pry'
 module Shushuwhee
   SHUSHUWEN_URL = "http://www.shushuw.cn/"
   NEWLINE = "\r\n"
+  DEBUG_MODE = false
 
   class << self
     # Finds all the books in book_list and reads them, outputting their
@@ -33,7 +34,7 @@ module Shushuwhee
     #   output_folder_name.
     def read_book(book_id, opts = {})
       opts = opts
-      puts "Debug: Book #{book_id}"
+      debug "Debug: Book #{book_id}"
 
       tmpdir = Dir.mktmpdir(book_id)
       output_file = nil
@@ -45,9 +46,10 @@ module Shushuwhee
       chapters = table_of_contents.css("ul li")
 
       chapter_list = []
-#      chapters.each do |chapter|
-      chapters[0..2].each_with_index do |chapter|
-        puts "Debug:   chapter  #{chapter.children.first.child.text}"
+
+      chapters = chapters[0..2] if debug_mode?
+      chapters.each do |chapter|
+        debug "Debug:   chapter  #{chapter.children.first.child.text}"
         chapter_text = read_chapter(chapter)
         chapter_id = chapter_id(chapter)
         chapter_title = chapter_title(chapter)
@@ -58,7 +60,7 @@ module Shushuwhee
           chapter_file_name = tmpdir + "/#{chapter_id}.xhtml"
         end
 
-        p "DEBUG: #{chapter_file_name}"
+        debug "DEBUG: #{chapter_file_name}"
         output_to_file(chapter_text, chapter_file_name)
 
         chapter_list << {:file => "#{chapter_id}.xhtml", :title => chapter_title}
@@ -106,16 +108,11 @@ module Shushuwhee
 
       image_path = download_image(title_page.css(".bookimg"), tmpdir)
 
-      p image_path
-      # create cover image
-
       builder = GEPUB::Builder.new do
         unique_identifier parsed_identifier, 'url'
         language 'zh'
 
         title parsed_title
-        #subtitle (none)
-        #collection (none)
         creator parsed_author
 
         id book_id
@@ -143,7 +140,6 @@ module Shushuwhee
     end
   end
 
-  # Your code goes here...
   private
 
   class << self
@@ -187,6 +183,14 @@ module Shushuwhee
       else
         p text
       end
+    end
+
+    def debug_mode?
+      DEBUG_MODE
+    end
+
+    def debug(text)
+      p text if debug_mode?
     end
   end
 end
